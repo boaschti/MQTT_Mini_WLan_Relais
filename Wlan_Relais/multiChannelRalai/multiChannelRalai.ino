@@ -21,10 +21,6 @@ void MQTTBrokerChanged(){
 }
 */
 
-//paired outputs
-// out1, out2
-// out3, out5
-// out4, out6
 
 
 #define lockpairedOutputs
@@ -35,6 +31,11 @@ void MQTTBrokerChanged(){
 #define outpin5 12
 #define outpin6 14
 
+//paired outputs
+// out1, out2
+// out3, out5
+// out4, out6
+//see https://github.com/boaschti/MQTT_Mini_WLan_Relais/blob/master/Board/RolloRelais/pinning%20SSR.JPG
 #define out1 outpin1
 #define out2 outpin2
 #define out3 outpin3
