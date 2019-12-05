@@ -2,7 +2,7 @@
 
 
 #define userpage_existing
-#define AllowAcessPoint
+//#define AllowAcessPoint
 
 #include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.h"
 #include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.cpp"
@@ -24,24 +24,20 @@ void MQTTBrokerChanged(){
 
 
 #define lockpairedOutputs
-#define outpin1 5
-#define outpin2 15
-#define outpin3 4
-#define outpin4 16
-#define outpin5 12
-#define outpin6 14
+
 
 //paired outputs
 // out1, out2
 // out3, out5
 // out4, out6
 //see https://github.com/boaschti/MQTT_Mini_WLan_Relais/blob/master/Board/RolloRelais/pinning%20SSR.JPG
-#define out1 outpin1
-#define out2 outpin2
-#define out3 outpin3
-#define out4 outpin5
-#define out5 outpin4
-#define out6 outpin6
+// set Jumper1 and R28
+
+#define out1 12
+#define out2 14
+#define out3 16
+#define outPower 15
+
 
 #define in1  13
 #define in2  2
@@ -91,17 +87,13 @@ void setup() {
     pinMode(out1, OUTPUT);
     pinMode(out2, OUTPUT);
     pinMode(out3, OUTPUT);
-    pinMode(out4, OUTPUT);
-    pinMode(out5, OUTPUT);
-    pinMode(out6, OUTPUT);
+    pinMode(outPower, OUTPUT);
+
 
     digitalWrite(out1, LOW);
     digitalWrite(out2, LOW);
     digitalWrite(out3, LOW);
-    digitalWrite(out4, LOW);
-    digitalWrite(out5, LOW);
-    digitalWrite(out6, LOW);
-    
+    digitalWrite(outPower, LOW);
     
     setup_server();
     
@@ -133,22 +125,13 @@ uint8_t getPairedOutput(uint8_t output){
     
     #ifdef lockpairedOutputs
     if(output == out1){
-        return out2;
+        return outPower;
     }
     if(output == out2){
-        return out1;
+        return outPower;
     }
     if(output == out3){
-        return out4;
-    }
-    if(output == out4){
-        return out3;
-    }
-    if(output == out5){
-        return out6;
-    }
-    if(output == out6){
-        return out5;
+        return outPower;
     }
     #else
     return output;
@@ -171,20 +154,16 @@ bool setAndCheckOutput(uint8_t output){
 }
 
 void resetAllOutputs(){
-  
     Serial.println("alles aus");
+    digitalWrite(outPower, LOW);
+    delay(200);
     digitalWrite(out1, LOW);
     digitalWrite(out2, LOW);
     digitalWrite(out3, LOW);
-    digitalWrite(out4, LOW);
-    digitalWrite(out5, LOW);
-    digitalWrite(out6, LOW);
     mqttpublishJSON("out1","OFF");
     mqttpublishJSON("out2","OFF");
     mqttpublishJSON("out3","OFF");
-    mqttpublishJSON("out4","OFF");
-    mqttpublishJSON("out5","OFF");
-    mqttpublishJSON("out6","OFF");
+    mqttpublishJSON("outPower","OFF");
   
 }
 
@@ -218,6 +197,7 @@ void setOutputs(uint8_t switchFunktion, uint8_t switchNr, bool resetOutputs = fa
     if(resetOutputs){
         shortpressCounter = 0;
         resetAllOutputs();
+        allOff = true;
         return;
     }
     
@@ -237,34 +217,45 @@ void setOutputs(uint8_t switchFunktion, uint8_t switchNr, bool resetOutputs = fa
             if(switchNr == 1){
                 switch(shortpressCounter){
                   case 0:
-                      Serial.println("1 3 5 ein");
-                      setAndCheckOutput(out1);
-                      setAndCheckOutput(out3);
-                      setAndCheckOutput(out5);
-                      mqttpublishJSON("out1","ON");
-                      mqttpublishJSON("out3","ON");
-                      mqttpublishJSON("out5","ON");
+                      Serial.println("4 ein");
+                      setAndCheckOutput(outPower);
+                      mqttpublishJSON("outPower","ON");
                       shortpressCounter = 0;
                       allOff = false;
                       break;
                   case 1:
-                      Serial.println("1 ein");
-                      mqttpublishJSON("out1","ON");
-                      setAndCheckOutput(out1);
+                      Serial.println("2 3 4 ein");
+                      mqttpublishJSON("out2","ON");
+                      mqttpublishJSON("out3","ON");
+                      mqttpublishJSON("outPower","ON");                      
+                      setAndCheckOutput(out2);
+                      setAndCheckOutput(out3);
+                      delay(100);
+                      setAndCheckOutput(outPower);
                       shortpressCounter = 0;
                       allOff = false;
                       break;
                   case 2:
-                      Serial.println("3 ein");
+                      Serial.println("1 3 4 ein");
+                      mqttpublishJSON("out1","ON");
                       mqttpublishJSON("out3","ON");
+                      mqttpublishJSON("outPower","ON");
+                      setAndCheckOutput(out1);
                       setAndCheckOutput(out3);
+                      delay(100);
+                      setAndCheckOutput(outPower);
                       shortpressCounter = 0;
                       allOff = false; 
                       break;
                   case 3:
-                      Serial.println("5 ein");
-                      mqttpublishJSON("out5","ON");
-                      setAndCheckOutput(out5);
+                      Serial.println("1 2 4 ein");
+                      mqttpublishJSON("out1","ON");
+                      mqttpublishJSON("out2","ON");
+                      mqttpublishJSON("outPower","ON");                      
+                      setAndCheckOutput(out1);
+                      setAndCheckOutput(out2);
+                      delay(100);
+                      setAndCheckOutput(outPower);
                       shortpressCounter = 0;
                       allOff = false;
                       break;
@@ -279,34 +270,46 @@ void setOutputs(uint8_t switchFunktion, uint8_t switchNr, bool resetOutputs = fa
             if(switchNr == 2){
                 switch(shortpressCounter){
                   case 0:
-                      Serial.println("2 4 6 ein");
+                      Serial.println("1 2 3 4 ein");
+                      setAndCheckOutput(out1);
                       setAndCheckOutput(out2);
-                      setAndCheckOutput(out4);
-                      setAndCheckOutput(out6);
+                      setAndCheckOutput(out3);
+                      delay(100);
+                      setAndCheckOutput(outPower);                      
+                      mqttpublishJSON("outPower","ON");                      
+                      mqttpublishJSON("out1","ON");
                       mqttpublishJSON("out2","ON");
-                      mqttpublishJSON("out4","ON");
-                      mqttpublishJSON("out6","ON");
+                      mqttpublishJSON("out3","ON");
                       shortpressCounter = 0;
                       allOff = false;
                       break;
                   case 1:
-                      Serial.println("2 ein");
-                      mqttpublishJSON("out2","ON");
-                      setAndCheckOutput(out2);
+                      Serial.println("1 4 ein");
+                      mqttpublishJSON("out1","ON");
+                      mqttpublishJSON("outPower","ON");                      
+                      setAndCheckOutput(out1);
+                      delay(100);
+                      setAndCheckOutput(outPower);                      
                       shortpressCounter = 0;
                       allOff = false;
                       break;
                   case 2:
-                      Serial.println("4 ein");
-                      mqttpublishJSON("out4","ON");
-                      setAndCheckOutput(out4);
+                      Serial.println("2 4 ein");
+                      mqttpublishJSON("out1","ON");
+                      mqttpublishJSON("outPower","ON");                      
+                      setAndCheckOutput(out2);
+                      delay(100);
+                      setAndCheckOutput(outPower);                      
                       shortpressCounter = 0;
                       allOff = false;
                       break;
                   case 3:
-                      Serial.println("6 ein");
-                      mqttpublishJSON("out6","ON");
-                      setAndCheckOutput(out6);
+                      Serial.println("3 4 ein");
+                      mqttpublishJSON("out3","ON");
+                      mqttpublishJSON("outPower","ON");                      
+                      setAndCheckOutput(out3);
+                      delay(100);
+                      setAndCheckOutput(outPower);                      
                       shortpressCounter = 0;
                       allOff = false;
                       break;
