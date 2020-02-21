@@ -76,25 +76,61 @@ void handleconfigureUser(){
 }
 
 
+bool runTimer = false;
+unsigned long timstampTimeout;
+const char* open_cmd = "open";
+const char* close_cmd = "close";
+const char* stop_cmd = "stop";
+
+void setOutputs(uint8_t switchFunktion, uint8_t switchNr, bool resetOutputs);
+
 void callback(char* topic, byte* payload, unsigned int length) {
+    char receivedpayload[50];
+
+    for (int i=0;i<length;i++) {
+        receivedpayload[i] = (char)payload[i];
+    }
+
     mqttpublish("Info", "got Message");
+    
+    if (strncmp(receivedpayload, open_cmd, 4) == 0){
+    //if (receivedpayload ==  "open"){
+        mqttpublish("Info", "got Message open");
+        runTimer = true;
+        timstampTimeout = millis();
+        setOutputs(2, 1, false);            
+    }
+    if (strncmp(receivedpayload, close_cmd, 4) == 0){
+        mqttpublish("Info", "got Message close");
+        runTimer = true;
+        timstampTimeout = millis();
+        setOutputs(2, 2, false);            
+    }
+    if (strncmp(receivedpayload, stop_cmd, 4) == 0){
+        mqttpublish("Info", "got Message stop");
+        runTimer = true;
+        timstampTimeout = millis();
+        setOutputs(0,0,true);          
+    }
+  
+
 }
 
 
   
 void setup() {
 
+    digitalWrite(out1, LOW);
+    digitalWrite(out2, LOW);
+    digitalWrite(out3, LOW);
+    digitalWrite(outPower, LOW);    
+    
     pinMode(out1, OUTPUT);
     pinMode(out2, OUTPUT);
     pinMode(out3, OUTPUT);
     pinMode(outPower, OUTPUT);
 
 
-    digitalWrite(out1, LOW);
-    digitalWrite(out2, LOW);
-    digitalWrite(out3, LOW);
-    digitalWrite(outPower, LOW);
-    
     setup_server();
     
     pinMode(in1, INPUT);
@@ -112,7 +148,7 @@ uint8_t getPressFunktion(unsigned long presstime){
     if ((presstime >= shortpress) && (presstime <= middlelongpress)){
         return 1;
     }
-    if ((presstime >= middlelongpress) && (presstime <= longpress)){
+    if ((presstime > middlelongpress) && (presstime <= longpress)){
         return 2;
     }
     if (presstime > longpress){
@@ -342,46 +378,57 @@ void loop(){
 
         static bool in1Detected = false;
         static bool in2Detected = false;
-        static bool runTimer = false;
-        static unsigned long timstampTimeout;
         unsigned long in1pressTimestamp;
         unsigned long in2pressTimestamp;
         
 
         if((digitalRead(in1) == LOW) && (!in1Detected)){
-          Serial.println("Taste 1 gedrueckt");
-          mqttpublishJSON("key1","ON");
-          in1Detected = true;
-          in1pressTimestamp = millis();
+            delay(60);
+            if (digitalRead(in1) == LOW){
+                Serial.println("Taste 1 gedrueckt");
+                mqttpublishJSON("key1","ON");
+                in1Detected = true;
+                in1pressTimestamp = millis();
+            }
         }
         
         if((digitalRead(in2) == LOW) && (!in2Detected)){
-          Serial.println("Taste 2 gerdrueckt");
-          mqttpublishJSON("key2","ON");
-          in2Detected = true;
-          in2pressTimestamp = millis();
+            delay(60);
+            if (digitalRead(in2) == LOW){
+                Serial.println("Taste 2 gerdrueckt");
+                mqttpublishJSON("key2","ON");
+                in2Detected = true;
+                in2pressTimestamp = millis();
+            }
         }
         
         if((digitalRead(in1) == HIGH) && (in1Detected)){
-            Serial.println("Taste 1 losgelassen");
-            mqttpublishJSON("key1","OFF");
-            in1Detected = false;
-            runTimer = true;
-            timstampTimeout = millis();
-            setOutputs(getPressFunktion(millis() - in1pressTimestamp), 1);
+            delay(60);
+            if (digitalRead(in1) == HIGH){
+                Serial.println("Taste 1 losgelassen");
+                mqttpublishJSON("key1","OFF");
+                in1Detected = false;
+                runTimer = true;
+                timstampTimeout = millis();
+                setOutputs(getPressFunktion(millis() - in1pressTimestamp), 1);
+            }
         }
         
         if((digitalRead(in2) == HIGH) && (in2Detected)){
-          Serial.println("Taste 2 losgelassen");
-          mqttpublishJSON("key1","OFF");
-          in2Detected = false;
-          runTimer = true;
-          timstampTimeout = millis();
-          setOutputs(getPressFunktion(millis() - in2pressTimestamp), 2);
+            delay(60);
+            if (digitalRead(in2) == HIGH){
+                Serial.println("Taste 2 losgelassen");
+                mqttpublishJSON("key1","OFF");
+                in2Detected = false;
+                runTimer = true;
+                timstampTimeout = millis();
+                setOutputs(getPressFunktion(millis() - in2pressTimestamp), 2);
+            }
         }   
         
         if ((runTimer) && ((timstampTimeout + timeout) <= millis())){
             //reset Outputs
+            mqttpublish("Info", "timer reseet");
             Serial.println("Timer abgelaufen");
             setOutputs(0,0,true);
             runTimer = false;
