@@ -4,6 +4,8 @@
 #define userpage_existing
 //#define AllowAcessPoint
 
+#define DeviceName "RolloRelais"
+
 #include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.h"
 #include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.cpp"
 #include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESP8266HTTPUpdateServer.h"
