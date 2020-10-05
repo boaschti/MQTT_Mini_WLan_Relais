@@ -1,27 +1,20 @@
 
 
+//#define AllowAcessPoint         // opens a acessPoint if saved Wlan is not reachable
+//#define WiFiNotRequired         // if there is no connection -> return from setup_server() (and run main loop) or restart esp until connection
+//#define showKeysInWeb true      // shows keys in WEB page (for debug! not recommendet!!)
 
-#define userpage_existing
-//#define AllowAcessPoint
+//#define usersubscribe_existing  //if a UserSubscribe() exists. Else the Server will connect automatically to set Topic
+//#define MQTTBrokerChanged_existing  // if a MQTTBrokerChanged() exists you can do sth if Broker is changed via web
 
 #define DeviceName "RolloRelais"
+#define userpage_existing
 
-#include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.h"
-#include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESPServer.cpp"
-#include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESP8266HTTPUpdateServer.h"
-#include "C:\Users\Basti\Documents\ESP8266-Server\ESP_Server\ESP8266HTTPUpdateServer.cpp"
-
+         
+#include "C:\Users\sebas\Documents\ESP8266-Server\ESPServer.h"
 
 
-/*
-void UserSubscribe(){
-    mqttpublish("Info", "usersubscribe");
-}
 
-void MQTTBrokerChanged(){
-    return;  
-}
-*/
 
 
 
